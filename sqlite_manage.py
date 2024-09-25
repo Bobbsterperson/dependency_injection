@@ -2,35 +2,32 @@ import sqlite3
 
 class SQLiteConnector:
     def __init__(self, db_name='example.db'):
-        # Connect to the SQLite database (it will create the file if it doesn't exist)
         self.conn = sqlite3.connect(db_name)
         self.cursor = self.conn.cursor()
         self.create_table()
 
     def create_table(self):
-        # Create a table if it doesn't already exist
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS items (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                item TEXT NOT NULL
+                item TEXT NOT NULL,
+                processed INTEGER DEFAULT 0  -- 0 = unprocessed, 1 = processed
             )
         ''')
         self.conn.commit()
 
     def add_item(self, item):
-        # Insert an item into the items table
-        self.cursor.execute('INSERT INTO items (item) VALUES (?)', (item,))
+        self.cursor.execute('INSERT INTO items (item, processed) VALUES (?, 0)', (item,))
         self.conn.commit()
-        print(f'Added: {item}')  # Confirm the item is added
-        print(f"Total items after addition: {self.cursor.lastrowid}")
 
     def display_items(self):
-        # Query and display all items
-        self.cursor.execute('SELECT * FROM items')
+        self.cursor.execute('SELECT * FROM items WHERE processed = 0')
         rows = self.cursor.fetchall()
-        print("\nCurrent items in the database:")
-        for row in rows:
-            print(row)
+        if rows:
+            for row in rows:
+                print(row)
+        else:
+            print("No unprocessed items to display.")
 
     def close(self):
         self.cursor.close()
@@ -38,7 +35,6 @@ class SQLiteConnector:
 
 def main():
     sqlite_connector = SQLiteConnector()
-
     try:
         while True:
             item = input("Enter an item: ")
