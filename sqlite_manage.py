@@ -1,6 +1,7 @@
 import sqlite3
 from abc import ABC, abstractmethod
 from bundler import run_bundler
+from mach import matchy
 
 class ItemStorage(ABC):
     @abstractmethod
@@ -45,7 +46,7 @@ def main():
     item_storage = SQLiteItemStorage()
     try:
         while True:
-            item = input("Enter an item (or type 'exit' to finish): ")
+            item = input("Enter an item: ")
             if item.lower() == 'exit':
                 break
             item_storage.add_item(item)
@@ -58,6 +59,7 @@ def main():
     finally:
         item_storage.close()
     run_bundler()
+    matchy()
 
 if __name__ == "__main__":
     main()
