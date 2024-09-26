@@ -17,7 +17,7 @@ class ItemStorage(ABC):
         pass
 
 class SQLiteItemStorage(ItemStorage):
-    _instance = None  # This will hold the single instance of the class
+    _instance = None
     
     def __new__(cls, db_name='example.db'):
         if cls._instance is None:
@@ -48,10 +48,10 @@ class SQLiteItemStorage(ItemStorage):
         if self._instance:
             self.cursor.close()
             self.conn.close()
-            SQLiteItemStorage._instance = None  # Reset the instance so a new one can be created later
+            SQLiteItemStorage._instance = None
 
 def main():
-    item_storage = SQLiteItemStorage()  # This will always return the same instance of SQLiteItemStorage
+    item_storage = SQLiteItemStorage()
     try:
         while True:
             item = input("Enter an item: ")
@@ -65,7 +65,7 @@ def main():
             else:
                 print("No unprocessed items to display.")
     finally:
-        item_storage.close()  # Close the connection at the end of the script
+        item_storage.close()
     run_bundler()
     matchy()
 
