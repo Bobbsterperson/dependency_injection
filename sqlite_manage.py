@@ -1,7 +1,7 @@
 import sqlite3
 from abc import ABC, abstractmethod
-from bundler import run_bundler
 from mach import matchy
+from bundler import run_bundler
 
 class ItemStorage(ABC):
     @abstractmethod
@@ -17,10 +17,16 @@ class ItemStorage(ABC):
         pass
 
 class SQLiteItemStorage(ItemStorage):
-    def __init__(self, db_name='example.db'):
-        self.conn = sqlite3.connect(db_name)
-        self.cursor = self.conn.cursor()
-        self.create_table()
+    _instance = None  # This will hold the single instance of the class
+    
+    def __new__(cls, db_name='example.db'):
+        if cls._instance is None:
+            print("Creating new SQLiteItemStorage instance")
+            cls._instance = super(SQLiteItemStorage, cls).__new__(cls)
+            cls._instance.conn = sqlite3.connect(db_name)
+            cls._instance.cursor = cls._instance.conn.cursor()
+            cls._instance.create_table()
+        return cls._instance
 
     def create_table(self):
         self.cursor.execute('''CREATE TABLE IF NOT EXISTS items (
@@ -39,11 +45,13 @@ class SQLiteItemStorage(ItemStorage):
         return self.cursor.fetchall()
 
     def close(self):
-        self.cursor.close()
-        self.conn.close()
+        if self._instance:
+            self.cursor.close()
+            self.conn.close()
+            SQLiteItemStorage._instance = None  # Reset the instance so a new one can be created later
 
 def main():
-    item_storage = SQLiteItemStorage()
+    item_storage = SQLiteItemStorage()  # This will always return the same instance of SQLiteItemStorage
     try:
         while True:
             item = input("Enter an item: ")
@@ -57,7 +65,7 @@ def main():
             else:
                 print("No unprocessed items to display.")
     finally:
-        item_storage.close()
+        item_storage.close()  # Close the connection at the end of the script
     run_bundler()
     matchy()
 
