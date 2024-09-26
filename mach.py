@@ -50,4 +50,9 @@ def matchy():
         db_connection.close()
 
 if __name__ == "__main__":
-    matchy()
+    db_name = 'bundle.db'
+    db_connection = DatabaseConnection(db_name)
+    print(db_connection)
+    db_connection = DatabaseConnection(db_name)
+    print(db_connection)
+    # matchy()
